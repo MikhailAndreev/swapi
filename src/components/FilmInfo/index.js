@@ -1,17 +1,16 @@
 import React, {Component} from 'react';
-import {connect} from 'react-redux';
 
 import {Link} from "react-router-dom";
-import '../../../containers/FilterApp/FilterApp.scss';
-import axios from '../../../utils/axios-films';
-import WithClass from '../../../hoc/withClass';
+import '../FilmInfo/FilmInfo.scss';
+import axios from '../../utils/axios-films';
+import WithClass from '../../hoc/withClass';
 
 
 class FilmInfo extends Component {
   state = {
-    count: 15,
-    filmTitle: '',
     data: [],
+    dataStarships: [],
+    error: false
   };
 
   fetch = () => {
@@ -21,14 +20,13 @@ class FilmInfo extends Component {
       })
       .then((response) => {
         this.setState(prevState => ({
-          loading: false,
-          data: response.data.starships,
+          data: response.data,
+          dataStarships: response.data.starships,
         }));
       })
 
       .catch(() => {
         this.setState({
-          loading: false,
           error: true,
         });
       });
@@ -44,23 +42,46 @@ class FilmInfo extends Component {
 
 
   render() {
-    const renderLinkList = this.state.data.map((starShip, index) => {
+    const renderLinkList = this.state.dataStarships.length > 0 && this.state.dataStarships.map((starShip, index) => {
       const linkId = starShip.match(/\d+/g).map(Number);
       return (
-        // <p>
-        //   {starShip}
-        // </p>
         <Link key={index} to={`${'/starship/'}${linkId}`}>
           {starShip}
         </Link>
       )
     });
+
     return (
       <WithClass classes='sw-films'>
+
+        {this.state.dataStarships.length < 1 && !this.state.error &&
+        < div className="spinner-border extra-margin" role="status">
+          <span className="sr-only">Loading...</span>
+        </div>
+        }
+
+        {this.state.dataStarships.length > 0 &&
+        <WithClass classes='sw-films'>
+          <p>
+            {this.state.data.title}
+          </p>
+          <p className='opening'>
+            {this.state.data.opening_crawl}
+          </p>
+          <p>
+            List of starships:
+          </p>
+
+          {renderLinkList}
+
+        </WithClass>
+        }
+
+        {this.state.dataStarships.length < 1 && this.state.error &&
         <p>
-          new Component will here
+          something went wrong
         </p>
-        {renderLinkList}
+        }
 
       </WithClass>
     );

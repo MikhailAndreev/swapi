@@ -1,15 +1,14 @@
 import React, {Component} from 'react';
-import {connect} from 'react-redux';
 
-
-import '../../../containers/FilterApp/FilterApp.scss';
-import axios from '../../../utils/axios-films';
-import WithClass from '../../../hoc/withClass';
+import axios from '../../utils/axios-films';
+import WithClass from '../../hoc/withClass';
 
 
 class StarShipInfo extends Component {
   state = {
-    data: [],
+    data: null,
+    loading: false,
+    error: false
   };
 
   fetch = () => {
@@ -19,14 +18,12 @@ class StarShipInfo extends Component {
       })
       .then((response) => {
         this.setState(prevState => ({
-          loading: false,
           data: response.data,
         }));
       })
 
       .catch(() => {
         this.setState({
-          loading: false,
           error: true,
         });
       });
@@ -34,28 +31,39 @@ class StarShipInfo extends Component {
 
   componentDidMount() {
     this.fetch();
-    console.log(this.props)
-    console.log(this.props.location.pathname)
   }
-
-  componentDidUpdate() {
-    console.log(this.state.data)
-  }
-
 
   render() {
     return (
       <WithClass classes='sw-films'>
         <p>
-          Page with current film
+          Page with current starship
         </p>
+        {this.state.data === null && !this.state.error &&
+        < div className="spinner-border extra-margin" role="status">
+          <span className="sr-only">Loading...</span>
+          </div>
+        }
 
+        {this.state.data !== null && !this.state.error &&
+        <WithClass classes='sw-films'>
+          <p>
+            Ship name: {this.state.data.name}
+          </p>
+          <p>
+            Ship model: {this.state.data.model}
+          </p>
+          <p>
+            passengers: {this.state.data.passengers}
+          </p>
+        </WithClass>
+        }
+        {this.state.data === null && this.state.error &&
         <p>
-          Ship name: {this.state.data.name}
+          something went wrong
         </p>
-        <p>
-          passangers: {this.state.data.passengers}
-        </p>
+        }
+
       </WithClass>
     );
   }
